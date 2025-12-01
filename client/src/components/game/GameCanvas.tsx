@@ -7,7 +7,6 @@ import { Target } from "../../game/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { TutorialOverlay } from "./TutorialOverlay";
 
 interface Star {
   x: number;
@@ -22,7 +21,6 @@ export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
   const [_, setLocation] = useLocation();
-  const [showTutorial, setShowTutorial] = useState(true);
   
   // Stars Ref
   const starsRef = useRef<Star[]>([]);
@@ -55,92 +53,105 @@ export function GameCanvas() {
         x: Math.random() * dimensions.width,
         y: Math.random() * dimensions.height,
         size: Math.random() * 2 + 1,
-        speed: Math.random() * 40 + 20, // Speed correlated with size? Maybe independent for parallax
+        speed: Math.random() * 40 + 20,
         opacity: Math.random() * 0.5 + 0.3
       });
     }
     starsRef.current = stars;
   }, [dimensions.width, dimensions.height]);
 
-  const { shipX, projectiles, particles, targets, score, setShipX } = useGameLoop(dimensions.width, dimensions.height);
+  const { shipXRef, projectilesRef, particlesRef, targets, score, update, setShipX } = useGameLoop(dimensions.width, dimensions.height);
   const shipImgRef = useRef<HTMLImageElement>(null);
 
   // Load ship image
   useEffect(() => {
     const img = new Image();
     img.src = shipImageSrc;
+    // When loaded, we don't need to force update because the loop runs every frame
     shipImgRef.current = img;
   }, []);
 
-  // Render Loop
+  // Main Game Loop (Logic + Render)
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (dimensions.width === 0) return;
 
-    // Clear
-    ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+    let animationFrameId: number;
 
-    // Update and Draw Stars
-    ctx.fillStyle = "#ffffff";
-    const deltaTime = 1/60; // Approx
-    
-    starsRef.current.forEach(star => {
-      star.y += star.speed * deltaTime;
-      if (star.y > dimensions.height) {
-        star.y = 0;
-        star.x = Math.random() * dimensions.width;
+    const loop = () => {
+      // 1. Run Game Logic
+      update();
+
+      // 2. Render
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          // Clear
+          ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+
+          // Draw Stars
+          ctx.fillStyle = "#ffffff";
+          const deltaTime = 1/60; 
+          
+          starsRef.current.forEach(star => {
+            star.y += star.speed * deltaTime;
+            if (star.y > dimensions.height) {
+              star.y = 0;
+              star.x = Math.random() * dimensions.width;
+            }
+            
+            ctx.globalAlpha = star.opacity;
+            ctx.fillRect(star.x, star.y, star.size, star.size);
+          });
+          ctx.globalAlpha = 1.0;
+
+          // Draw Projectiles
+          ctx.fillStyle = "#00ffff";
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#00ffff";
+          projectilesRef.current.forEach(p => {
+            ctx.fillRect(p.x - 2, p.y, p.width, p.height);
+          });
+          ctx.shadowBlur = 0;
+
+          // Draw Particles
+          particlesRef.current.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          });
+
+          // Draw Ship
+          const shipPixelX = (shipXRef.current / 100) * dimensions.width;
+          const shipY = dimensions.height - GAME_CONFIG.SHIP_HEIGHT - 20;
+          
+          if (shipImgRef.current && shipImgRef.current.complete) {
+            ctx.drawImage(
+              shipImgRef.current, 
+              shipPixelX - GAME_CONFIG.SHIP_WIDTH/2, 
+              shipY, 
+              GAME_CONFIG.SHIP_WIDTH, 
+              GAME_CONFIG.SHIP_HEIGHT
+            );
+          } else {
+            // Fallback while loading
+            ctx.fillStyle = "cyan";
+            ctx.fillRect(shipPixelX - 20, shipY, 40, 40);
+          }
+        }
       }
-      
-      ctx.globalAlpha = star.opacity;
-      ctx.fillRect(star.x, star.y, star.size, star.size);
-    });
-    ctx.globalAlpha = 1.0;
 
-    // Draw Projectiles
-    ctx.fillStyle = "#00ffff";
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "#00ffff";
-    projectiles.forEach(p => {
-      ctx.fillRect(p.x - 2, p.y, p.width, p.height);
-    });
-    ctx.shadowBlur = 0;
+      animationFrameId = requestAnimationFrame(loop);
+    };
 
-    // Draw Particles
-    particles.forEach(p => {
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-
-    // Draw Ship
-    const shipPixelX = (shipX / 100) * dimensions.width;
-    const shipY = dimensions.height - GAME_CONFIG.SHIP_HEIGHT - 20;
-    
-    if (shipImgRef.current) {
-      ctx.drawImage(
-        shipImgRef.current, 
-        shipPixelX - GAME_CONFIG.SHIP_WIDTH/2, 
-        shipY, 
-        GAME_CONFIG.SHIP_WIDTH, 
-        GAME_CONFIG.SHIP_HEIGHT
-      );
-    } else {
-      // Fallback
-      ctx.fillStyle = "cyan";
-      ctx.fillRect(shipPixelX - 20, shipY, 40, 40);
-    }
-
-  }, [shipX, projectiles, particles, dimensions]);
+    animationFrameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [dimensions, update]); // Dependencies: update is stable from useGameLoop
 
   const handleTouch = (e: React.TouchEvent | React.MouseEvent) => {
-    // If tutorial is visible, don't move ship on click (let tutorial handle dismissal)
-    if (showTutorial) return;
-
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -153,9 +164,11 @@ export function GameCanvas() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-screen bg-background overflow-hidden select-none"
+      className="relative w-full h-screen bg-background overflow-hidden select-none cursor-none"
       onClick={handleTouch}
       onTouchStart={handleTouch}
+      tabIndex={0} // Ensure div can take focus for keys if needed (though we use window listeners)
+      autoFocus
     >
       <canvas
         ref={canvasRef}
@@ -163,8 +176,6 @@ export function GameCanvas() {
         height={dimensions.height}
         className="absolute inset-0 z-10"
       />
-      
-      <TutorialOverlay onDismiss={() => setShowTutorial(false)} onSkip={() => setLocation('/projects')} />
       
       {/* UI Layer */}
       <div className="absolute inset-0 z-20 pointer-events-none">

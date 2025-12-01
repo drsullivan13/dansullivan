@@ -9,23 +9,26 @@ export function useGameLoop(width: number, height: number) {
   const lastTimeRef = useRef<number>(0);
   const [score, setScore] = useState(0);
   
-  // Game State Refs for performance (avoiding re-renders for 60fps loop)
+  // Game State Refs (Mutable state for the game loop)
   const shipXRef = useRef(50); // %
   const projectilesRef = useRef<Projectile[]>([]);
   const particlesRef = useRef<Particle[]>([]);
-  
-  // Targets state needs to be reactive for UI updates, but we also need a ref for the loop
-  const [targets, setTargets] = useState<Target[]>([]);
   const targetsRef = useRef<Target[]>([]);
-
   const cooldownRef = useRef(0);
   const keysPressed = useRef<{ [key: string]: boolean }>({});
 
-  // Initialize Targets based on screen width
+  // We expose a ref to the latest React-managed targets so we can read them in the loop
+  // BUT to avoid tearing, we probably should just keep targets in the ref and only sync to state for UI.
+  // Let's stick to: Logic updates Refs -> Syncs to State if needed for DOM UI.
+  const [targetsState, setTargetsState] = useState<Target[]>([]);
+
+  // Initialize Targets
   useEffect(() => {
     if (width === 0) return;
 
-    const totalWidth = Math.min(width, 1200); // Max width for targets container
+    // Only initialize if empty or if width changed significantly? 
+    // Actually, we should reset when width changes to re-center.
+    const totalWidth = Math.min(width, 1200);
     const startX = (width - totalWidth) / 2;
     const spacing = totalWidth / 4;
 
@@ -34,14 +37,14 @@ export function useGameLoop(width: number, height: number) {
       width: GAME_CONFIG.TARGET_WIDTH,
       height: GAME_CONFIG.TARGET_HEIGHT,
       x: startX + (spacing * i) + (spacing / 2) - (GAME_CONFIG.TARGET_WIDTH / 2),
-      y: 100, // Fixed top offset
+      y: 100,
     }));
 
-    setTargets(newTargets);
     targetsRef.current = newTargets;
+    setTargetsState(newTargets);
   }, [width]);
 
-  // Input handling
+  // Input Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keysPressed.current[e.code] = true;
@@ -52,7 +55,6 @@ export function useGameLoop(width: number, height: number) {
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
@@ -94,11 +96,9 @@ export function useGameLoop(width: number, height: number) {
     cooldownRef.current = GAME_CONFIG.FIRE_COOLDOWN;
   };
 
-  const update = useCallback((time: number) => {
-    if (!lastTimeRef.current) lastTimeRef.current = time;
-    // const deltaTime = time - lastTimeRef.current; // Use for time-based movement if needed
-    lastTimeRef.current = time;
-
+  // The update loop - this is pure logic. 
+  // It updates the Refs. It does NOT trigger React renders.
+  const update = useCallback(() => {
     // 1. Update Ship
     if (keysPressed.current["ArrowLeft"] || keysPressed.current["KeyA"]) {
       shipXRef.current = Math.max(2, shipXRef.current - GAME_CONFIG.SHIP_SPEED);
@@ -118,16 +118,12 @@ export function useGameLoop(width: number, height: number) {
       if (p.y < -20) p.active = false;
     });
 
-    // 3. Collision Detection
+    // 3. Collision
     let targetsChanged = false;
-    
     projectilesRef.current.forEach(p => {
       if (!p.active) return;
-
       targetsRef.current.forEach(t => {
         if (t.hp <= 0) return;
-
-        // Simple AABB collision
         if (
           p.x > t.x &&
           p.x < t.x + t.width &&
@@ -143,7 +139,7 @@ export function useGameLoop(width: number, height: number) {
           if (t.hp <= 0) {
             spawnParticles(t.x + t.width/2, t.y + t.height/2, t.color, 50);
             setScore(s => s + 500);
-            setTimeout(() => setLocation(t.route), 1000); // Delay for explosion
+            setTimeout(() => setLocation(t.route), 1000);
           }
         }
       });
@@ -151,7 +147,7 @@ export function useGameLoop(width: number, height: number) {
 
     projectilesRef.current = projectilesRef.current.filter(p => p.active);
 
-    // 4. Update Particles
+    // 4. Particles
     particlesRef.current.forEach(p => {
       p.x += p.dx;
       p.y += p.dy;
@@ -159,25 +155,20 @@ export function useGameLoop(width: number, height: number) {
     });
     particlesRef.current = particlesRef.current.filter(p => p.life > 0);
 
-    // Sync React State for targets only if changed
+    // Sync Targets to React State if changed (for DOM UI)
     if (targetsChanged) {
-      setTargets([...targetsRef.current]);
+      setTargetsState([...targetsRef.current]);
     }
-
-    requestRef.current = requestAnimationFrame(update);
   }, [width, height, setLocation]);
 
-  useEffect(() => {
-    requestRef.current = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(requestRef.current!);
-  }, [update]);
-
+  // We return the REFS so the canvas can read them directly in its own loop
   return {
-    shipX: shipXRef.current,
-    projectiles: projectilesRef.current,
-    particles: particlesRef.current,
-    targets,
+    shipXRef,
+    projectilesRef,
+    particlesRef,
+    targets: targetsState, // React State for DOM
     score,
+    update, // The logic function
     setShipX: (x: number) => { shipXRef.current = x; }
   };
 }
