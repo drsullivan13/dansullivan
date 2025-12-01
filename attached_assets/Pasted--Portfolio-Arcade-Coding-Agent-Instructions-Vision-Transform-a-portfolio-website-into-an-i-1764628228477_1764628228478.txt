@@ -1,0 +1,447 @@
+# Portfolio Arcade - Coding Agent Instructions
+
+## Vision
+
+Transform a portfolio website into an **interactive Galaga-inspired experience** where visitors pilot a ship through your career, shooting at sections to explore projects, blog posts, and recipes. But here's the critical insight: *The game IS the interface, not a gimmick blocking content.*
+
+**Design Philosophy:** "Advanced technology should feel like magic, not a maze." - Make it delightful, instant, and optional.
+
+---
+
+## Core Experience
+
+### The Game Canvas (Full Viewport)
+
+```
+                [Top of screen - Enemy Formation Style]
+        
+        🎯 PROJECTS        📝 BLOG        🍳 RECIPES        👤 ABOUT
+          (12 HP)         (8 HP)          (5 HP)          (1 HP)
+         [pulsing]       [pulsing]       [pulsing]       [pulsing]
+
+
+                          [Middle - Stars scrolling down]
+
+
+                               ▲ 
+                              ▲ ▲        [Player Ship - Pixel Art]
+                               ▲
+                          [Bottom Third]
+
+        [Score: 0]  [Level: Software Engineer]  [Skip Game →]
+```
+
+---
+
+## Mechanics (Keep It Simple)
+
+### Player Ship
+- **Position:** Bottom third of screen, moves horizontally only
+- **Controls:** 
+  - Desktop: Arrow keys (←→) or A/D to move, SPACE to shoot
+  - Mobile: Touch left/right side of screen to move, tap ship to shoot
+  - Alternative: Click/tap anywhere to move ship there smoothly
+- **Visual:** Retro pixel-art style ship, subtle engine glow
+- **Speed:** Responsive but not twitchy (300px/sec)
+
+### Target Sections (Top Formation)
+- **Layout:** 4 "targets" arranged like Galaga enemies
+  - **PROJECTS** (left) - 12 hits to destroy
+  - **BLOG** (center-left) - 8 hits
+  - **RECIPES** (center-right) - 5 hits  
+  - **ABOUT** (right) - 1 hit (instant access)
+- **Visual:** Each target is a rounded rectangle with icon + label + HP bar
+- **Behavior:** 
+  - Gentle bobbing animation (like floating)
+  - Pulse/glow on hit
+  - Health bar depletes with each shot
+  - "Explode" animation on destruction → Navigate to that section
+- **Hit Points = Content Volume** (Projects has most content, About is quick)
+
+### Projectiles
+- **Visual:** Simple colored bullets (matching accent color)
+- **Speed:** Fast enough to feel responsive (800px/sec)
+- **Collision:** Detect hit, reduce HP, visual feedback
+- **Sound:** Optional subtle "pew" and "hit" sounds (can be muted)
+
+### Background
+- **Starfield:** Parallax scrolling stars (3 layers, different speeds)
+- **Color:** Deep space gradient (dark blue → black)
+- **Performance:** Canvas-based for smooth 60fps
+
+---
+
+## Critical UX Requirements
+
+### 1. **Instant Escape Hatch**
+```
+Top-right corner: [Skip Game →] button
+```
+- Always visible, doesn't require game interaction
+- Click = Traditional navigation menu appears
+- Users can bypass game entirely
+
+### 2. **Immediate Clarity**
+First-time visitors see brief overlay:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Welcome, Commander
+
+   ← → or A/D    Move ship
+   SPACE         Shoot
+   CLICK         Direct navigation
+
+   Destroy targets to explore portfolio
+   
+   [START MISSION]  [Skip to Menu →]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+- Shows once per session (localStorage)
+- Dismisses on first keypress or click
+- "Skip to Menu" goes directly to traditional nav
+
+### 3. **Mobile-First Controls**
+- Touch left/right screen edges to move
+- Tap ship or dedicated fire button to shoot
+- Large touch targets (minimum 60px)
+- Haptic feedback on hits (if supported)
+
+### 4. **Accessibility Mode**
+- Setting to disable game, show traditional menu
+- Keyboard navigation for all interactions
+- Screen reader announces: "Interactive portfolio game. Press Enter to skip to standard navigation."
+
+---
+
+## Technical Implementation
+
+### Phase 1: Game Engine Foundation
+
+**Tech Stack:**
+- Next.js 15 + TypeScript
+- **HTML5 Canvas** for game rendering (not WebGL - keep it simple)
+- **React state** for game logic
+- **Tailwind** for UI chrome (score, skip button)
+- **Framer Motion** for page transitions after section "destruction"
+
+**File Structure:**
+```
+app/
+├── page.tsx                 (Game Canvas + Overlay)
+├── components/
+│   ├── GameCanvas.tsx       (Main game loop)
+│   ├── PlayerShip.tsx       (Ship logic + rendering)
+│   ├── Target.tsx           (Section targets)
+│   ├── Starfield.tsx        (Background)
+│   └── Tutorial.tsx         (First-time overlay)
+├── game/
+│   ├── useGameLoop.ts       (60fps RAF loop)
+│   ├── useControls.ts       (Input handling)
+│   ├── collision.ts         (Hit detection)
+│   └── constants.ts         (Game config)
+└── [sections]/
+    ├── projects/
+    ├── writing/
+    ├── recipes/
+    └── about/
+```
+
+### Phase 2: Game Loop
+
+**Core Loop (60fps):**
+```typescript
+function useGameLoop() {
+  // 1. Update player position (input)
+  // 2. Update projectiles (movement + collision)
+  // 3. Update targets (health, animations)
+  // 4. Render all entities
+  // 5. Check win conditions (target destroyed)
+}
+```
+
+**Performance Target:**
+- Solid 60fps on all devices
+- < 100ms input lag
+- < 2MB total bundle size
+
+### Phase 3: Polish
+
+**Visual Effects:**
+- Particle explosions on target destruction
+- Ship engine trail
+- Screen shake on hit (subtle, 2px)
+- Score pop-ups (+10, +25, etc.)
+- "CRITICAL HIT" text for last shot on target
+
+**Audio (Optional, Muted by Default):**
+- Laser fire: Subtle "pew"
+- Hit: Satisfying "ding"
+- Destruction: Retro explosion
+- Background: Ambient space music (very quiet)
+- Mute button always visible
+
+---
+
+## Detailed Requirements
+
+### Landing Experience
+
+**First Load:**
+1. Starfield fades in (500ms)
+2. Targets materialize from top with stagger (200ms each)
+3. Player ship rises from bottom (300ms)
+4. Tutorial overlay appears (if first visit)
+5. Game becomes active
+
+**Total load time:** < 1.5 seconds
+
+### Target Design
+
+**PROJECTS Target:**
+```
+┏━━━━━━━━━━━━━┓
+┃  🎯 PROJECTS ┃
+┃  ▓▓▓▓▓░░░░░░ ┃  ← Health bar (12/12)
+┃  12 HP       ┃
+┗━━━━━━━━━━━━━┛
+```
+- Width: 200px, Height: 100px
+- Icon: Large, clear
+- HP bar: Prominent, color-coded (green → yellow → red)
+- Glow effect increases as HP decreases (builds urgency)
+
+**Hit Feedback:**
+1. Target flashes white (50ms)
+2. HP bar decreases with smooth animation
+3. Particle burst at impact point
+4. Screen shake (2px, 100ms)
+5. Score floats up (+10 in accent color)
+
+**Destruction Sequence:**
+1. Target explodes (particle burst)
+2. Screen flash (white, 100ms)
+3. "ACCESSING [SECTION]..." appears
+4. Fade to section page (300ms transition)
+5. Confetti/celebration effect (brief)
+
+### Projectile Physics
+
+**Bullet:**
+- Size: 4px × 12px (small, fast)
+- Color: Accent color with glow
+- Speed: 800px/sec straight up
+- Max on screen: 3 bullets (prevents spam)
+- Collision: Simple bounding box (fast calculation)
+
+**Rate of Fire:**
+- Cooldown: 300ms between shots
+- Visual: Ship glows during cooldown (can't shoot)
+- Feel: Deliberate, not spray-and-pray
+
+### Starfield Animation
+
+**Three Layers:**
+- Layer 1 (far): 50 small stars, slow (20px/sec)
+- Layer 2 (mid): 30 medium stars, medium (40px/sec)  
+- Layer 3 (near): 20 large stars, fast (80px/sec)
+
+**Visual:**
+- White dots with slight glow
+- Twinkling opacity variation
+- Wrap at bottom (infinite scroll)
+- Parallax creates depth
+
+### Score System
+
+**Points:**
+- Hit any target: +10
+- Destroy ABOUT: +100 (easiest)
+- Destroy RECIPES: +500
+- Destroy BLOG: +800
+- Destroy PROJECTS: +1200 (hardest)
+
+**Display:**
+- Top-left corner
+- Large, retro font
+- Animates on increase
+- High score persisted (localStorage)
+
+---
+
+## Mobile Optimization
+
+### Landscape vs Portrait
+
+**Landscape (Recommended):**
+- Full experience as described
+- Prompt on load: "For best experience, rotate device"
+
+**Portrait:**
+- Targets stack vertically (less ideal but functional)
+- Ship controls remain at bottom
+- Reduced starfield density for performance
+
+### Touch Controls
+
+**Layout:**
+```
+[          Screen          ]
+[    ← Touch Left  Right Touch →    ]
+[                          ]
+[        🔫 FIRE           ]  ← Large button
+[      ▲ Ship ▲           ]
+```
+
+**Behavior:**
+- Touch zones: 40% left, 40% right, 20% center
+- Fire button: Fixed position, always reachable
+- Visual feedback: Pressed state on touch
+- No accidental fires from movement touches
+
+---
+
+## Fallbacks & Accessibility
+
+### Skip Navigation (Always Available)
+
+**Top-right Button:**
+```
+[🎮 → 📋 Switch to Menu]
+```
+
+**Reveals Traditional Nav:**
+- Dropdown or slide-in menu
+- Same sections, instant access
+- Clean, readable list
+- Keyboard navigable
+
+### Reduced Motion Preference
+
+```javascript
+if (prefersReducedMotion) {
+  // Disable: explosions, screen shake, starfield animation
+  // Keep: basic movement, functional interactions
+  // Option: Skip game entirely, show nav by default
+}
+```
+
+### Keyboard-Only Users
+
+- TAB to "Skip Game" button
+- ENTER to access traditional nav
+- All sections accessible without mouse
+
+### Screen Readers
+
+```html
+<div role="application" aria-label="Interactive portfolio game. Press Enter for accessible navigation.">
+  <button aria-label="Skip game and view traditional navigation">Skip Game</button>
+  ...
+</div>
+```
+
+---
+
+## Phase Breakdown
+
+### Phase 1: Core Game (Start Here)
+- Canvas setup + game loop
+- Player ship movement (keyboard)
+- Single target with collision
+- Basic projectile system
+- Skip button to traditional nav
+
+**Deliverable:** Playable prototype with one target
+
+### Phase 2: Full Experience
+- All 4 targets with HP system
+- Starfield background
+- Touch controls for mobile
+- Score system
+- Destruction → navigation
+
+**Deliverable:** Complete game experience
+
+### Phase 3: Polish
+- Particle effects
+- Sound effects (muted by default)
+- Tutorial overlay
+- High score persistence
+- Performance optimization
+
+**Deliverable:** Production-ready arcade portfolio
+
+### Phase 4: Content Pages
+- Projects gallery (traditional layout)
+- Blog posts
+- Recipe collection
+- About page
+- Back button returns to game
+
+**Deliverable:** Complete portfolio with game entry point
+
+---
+
+## Success Criteria
+
+### The Game Should Feel:
+- **Responsive:** No input lag, buttery smooth
+- **Rewarding:** Satisfying feedback on every hit
+- **Optional:** Never blocks access to content
+- **Polished:** Pixel-perfect animations, no jank
+- **Fast:** Loads instantly, runs at 60fps
+
+### User Testing Questions:
+1. "Did you smile when you first saw it?"
+2. "Could you access the portfolio without frustration?"
+3. "Did the game enhance or distract from the content?"
+4. "Would you share this with a colleague?"
+
+**If any answer is "no," iterate.**
+
+---
+
+## Critical Reminders
+
+### ⚠️ Don't Make These Mistakes:
+- ❌ Game becomes mandatory barrier to content
+- ❌ Controls are confusing or unresponsive
+- ❌ Mobile experience is broken/unplayable
+- ❌ Performance drops below 30fps
+- ❌ Accessibility users are locked out
+- ❌ Loading takes > 3 seconds
+
+### ✅ Do These Things:
+- ✅ Test on actual mobile devices early
+- ✅ Profile frame rate continuously
+- ✅ Get feedback from non-gamers
+- ✅ Keep bundle size under 2MB
+- ✅ Provide instant content access option
+
+---
+
+## The Steve Jobs Test
+
+**Would Steve approve?**
+
+*"This should feel inevitable - like shooting at your portfolio was always meant to be this way. But the moment someone wants the information directly, don't make them work for it. Magic delights, friction frustrates. Build both paths."*
+
+---
+
+## Implementation Prompt for Agent
+
+**Start with Phase 1. Build a canvas-based arcade game where:**
+
+1. Player controls a ship at the bottom (arrow keys + space)
+2. Four targets float at top (PROJECTS, BLOG, RECIPES, ABOUT)
+3. Shooting targets depletes HP, destruction navigates to section
+4. Starfield background scrolls smoothly
+5. "Skip Game" button always visible for instant access
+
+**Tech:** Next.js 15, TypeScript, HTML5 Canvas, 60fps game loop
+
+**Critical:** Mobile must work perfectly. Performance is non-negotiable. Skip button must be obvious.
+
+**Acceptance:** I can shoot my way to my projects in < 5 seconds, OR skip entirely in 1 click.
+
+**Let's build something people remember.**
