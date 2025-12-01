@@ -43,7 +43,7 @@
     @apply border-border;
   }
   body {
-    @apply font-sans antialiased bg-background text-foreground overflow-hidden;
+    @apply font-sans antialiased bg-background text-foreground overflow-auto;
     background-image: radial-gradient(circle at 50% 100%, #1a2a4a 0%, #0b1026 100%);
   }
 }

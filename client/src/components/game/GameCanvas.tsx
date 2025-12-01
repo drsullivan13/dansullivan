@@ -205,7 +205,7 @@ export function GameCanvas() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-screen bg-background overflow-hidden select-none cursor-none"
+      className="relative w-full h-screen bg-background overflow-hidden select-none cursor-none fixed inset-0"
       onClick={handleTouch}
       onTouchStart={handleTouch}
       tabIndex={0} // Ensure div can take focus for keys if needed (though we use window listeners)
