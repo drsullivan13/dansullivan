@@ -62,13 +62,44 @@ export function GameCanvas() {
 
   const { shipXRef, projectilesRef, particlesRef, targets, score, update, setShipX } = useGameLoop(dimensions.width, dimensions.height);
   const shipImgRef = useRef<HTMLImageElement>(null);
+  const shipCanvasRef = useRef<HTMLCanvasElement | null>(null); // Cache the processed ship image
 
-  // Load ship image
+  // Load ship image and process transparency
   useEffect(() => {
     const img = new Image();
     img.src = shipImageSrc;
-    // When loaded, we don't need to force update because the loop runs every frame
-    shipImgRef.current = img;
+    
+    img.onload = () => {
+      // Create an offscreen canvas to process the image
+      const offscreen = document.createElement('canvas');
+      offscreen.width = img.width;
+      offscreen.height = img.height;
+      const ctx = offscreen.getContext('2d');
+      
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        
+        // Get pixel data
+        const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
+        const data = imageData.data;
+        
+        // Loop through pixels and make black transparent
+        // Threshold for "black" can be adjusted. Let's say < 30 for R, G, and B.
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          if (r < 30 && g < 30 && b < 30) {
+            data[i + 3] = 0; // Set alpha to 0
+          }
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        shipCanvasRef.current = offscreen; // Store the processed canvas
+        shipImgRef.current = img; // Keep ref for checks
+      }
+    };
   }, []);
 
   // Main Game Loop (Logic + Render)
@@ -128,8 +159,18 @@ export function GameCanvas() {
           const shipPixelX = (shipXRef.current / 100) * dimensions.width;
           const shipY = dimensions.height - GAME_CONFIG.SHIP_HEIGHT - 20;
           
-          if (shipImgRef.current && shipImgRef.current.complete) {
+          // Use the processed canvas if available, otherwise fallback
+          if (shipCanvasRef.current) {
             ctx.drawImage(
+              shipCanvasRef.current, 
+              shipPixelX - GAME_CONFIG.SHIP_WIDTH/2, 
+              shipY, 
+              GAME_CONFIG.SHIP_WIDTH, 
+              GAME_CONFIG.SHIP_HEIGHT
+            );
+          } else if (shipImgRef.current && shipImgRef.current.complete) {
+            // If processed version isn't ready but image is (unlikely with onload but possible), draw raw
+             ctx.drawImage(
               shipImgRef.current, 
               shipPixelX - GAME_CONFIG.SHIP_WIDTH/2, 
               shipY, 
