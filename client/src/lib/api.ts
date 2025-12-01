@@ -4,11 +4,12 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  fullDescription: string;
+  content: string;
   technologies: string[];
   role: string;
   timeframe: string;
   architecture: string;
+  preview?: string;
   demoUrl?: string;
 }
 
@@ -30,7 +31,7 @@ export interface Recipe {
   prepTime: string;
   tags: string[];
   ingredients: string[];
-  instructions: string[];
+  content: string;
   emoji: string;
 }
 
@@ -85,4 +86,13 @@ export function useRecipe(id: string) {
     queryFn: () => fetchAPI<Recipe>(`/api/recipes/${id}`),
     enabled: !!id,
   });
+}
+
+export function getMediaType(url: string): 'image' | 'gif' | 'video' | null {
+  if (!url) return null;
+  const ext = url.split('.').pop()?.toLowerCase();
+  if (ext === 'gif') return 'gif';
+  if (['mp4', 'webm', 'mov'].includes(ext || '')) return 'video';
+  if (['jpg', 'jpeg', 'png', 'webp', 'avif'].includes(ext || '')) return 'image';
+  return null;
 }

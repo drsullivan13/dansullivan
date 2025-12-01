@@ -82,18 +82,10 @@ export default function RecipeDetail() {
 
               <div className="p-8 md:col-span-2 bg-background">
                 <h3 className="font-game text-sm text-accent mb-6">SYNTHESIS PROTOCOL</h3>
-                <div className="space-y-8">
-                  {recipe.instructions.map((step, i) => (
-                    <div key={i} className="flex gap-6 group">
-                      <div className="font-game text-2xl text-accent/20 group-hover:text-accent transition-colors">
-                        {String(i + 1).padStart(2, '0')}
-                      </div>
-                      <p className="text-muted-foreground leading-relaxed pt-1 group-hover:text-foreground transition-colors">
-                        {step}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <div 
+                  className="prose prose-invert max-w-none text-muted-foreground leading-relaxed prose-headings:text-accent prose-headings:font-game prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-4 prose-p:mb-4 prose-ol:my-4 prose-li:my-2 prose-strong:text-white"
+                  dangerouslySetInnerHTML={{ __html: recipe.content }}
+                />
               </div>
             </div>
           </div>

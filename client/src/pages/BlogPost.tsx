@@ -35,7 +35,7 @@ export default function BlogPost() {
           <>
             <header className="mb-12 border-b border-border pb-8">
               <div className="flex items-center gap-4 text-secondary font-mono text-sm mb-4">
-                <span className="bg-secondary/10 px-2 py-1 rounded">TRANSMISSION #{post.id}</span>
+                <span className="bg-secondary/10 px-2 py-1 rounded">TRANSMISSION</span>
                 <span>{post.date}</span>
                 <span>{post.readTime} READ</span>
               </div>
@@ -47,9 +47,10 @@ export default function BlogPost() {
               </p>
             </header>
 
-            <div className="prose prose-invert prose-lg max-w-none text-gray-300 space-y-6 font-sans leading-loose whitespace-pre-line">
-              {post.content}
-            </div>
+            <div 
+              className="prose prose-invert prose-lg max-w-none text-gray-300 leading-loose prose-headings:text-white prose-headings:font-hud prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-strong:text-white prose-blockquote:border-secondary prose-blockquote:text-secondary/80 prose-blockquote:italic"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
 
             <div className="mt-16 pt-8 border-t border-border flex justify-between items-center">
               <div className="text-sm text-muted-foreground">

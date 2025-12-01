@@ -1,7 +1,40 @@
 import { NavBar } from "@/components/layout/NavBar";
 import { Button } from "@/components/ui/button";
 import { useRoute, Link } from "wouter";
-import { useProject } from "@/lib/api";
+import { useProject, getMediaType } from "@/lib/api";
+
+function MediaPreview({ src }: { src?: string }) {
+  if (!src) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-game text-6xl text-primary/20">PREVIEW</span>
+      </div>
+    );
+  }
+
+  const mediaType = getMediaType(src);
+
+  if (mediaType === 'video') {
+    return (
+      <video
+        src={src}
+        className="w-full h-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt="Project preview"
+      className="w-full h-full object-cover"
+    />
+  );
+}
 
 export default function ProjectDetail() {
   const [match, params] = useRoute("/projects/:id");
@@ -39,17 +72,16 @@ export default function ProjectDetail() {
               </h1>
               
               <div className="aspect-video bg-muted rounded-lg border border-border overflow-hidden relative group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-50 group-hover:opacity-70 transition-opacity" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-game text-6xl text-primary/20">PREVIEW</span>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-50 group-hover:opacity-70 transition-opacity z-10 pointer-events-none" />
+                <MediaPreview src={project.preview} />
               </div>
 
               <div className="prose prose-invert max-w-none">
                 <h3 className="font-hud text-2xl text-white mb-4">MISSION REPORT</h3>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {project.fullDescription}
-                </p>
+                <div 
+                  className="text-muted-foreground leading-relaxed prose-headings:text-white prose-headings:font-hud prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-p:mb-4 prose-ul:my-4 prose-li:my-1 prose-strong:text-white prose-blockquote:border-primary prose-blockquote:text-primary/80"
+                  dangerouslySetInnerHTML={{ __html: project.content }}
+                />
               </div>
             </div>
 
@@ -76,9 +108,11 @@ export default function ProjectDetail() {
 
                 {project.demoUrl && (
                   <div className="pt-4">
-                    <Button className="w-full font-game text-xs bg-primary text-black hover:bg-primary/90" data-testid="button-launch-demo">
-                      LAUNCH DEMO
-                    </Button>
+                    <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full font-game text-xs bg-primary text-black hover:bg-primary/90" data-testid="button-launch-demo">
+                        LAUNCH DEMO
+                      </Button>
+                    </a>
                   </div>
                 )}
               </div>

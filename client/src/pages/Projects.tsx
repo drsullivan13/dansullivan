@@ -1,6 +1,42 @@
 import { NavBar } from "@/components/layout/NavBar";
 import { Link } from "wouter";
-import { useProjects } from "@/lib/api";
+import { useProjects, getMediaType } from "@/lib/api";
+
+function MediaPreview({ src, title }: { src?: string; title: string }) {
+  if (!src) {
+    return (
+      <>
+        <div className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors" />
+        <div className="absolute inset-0 flex items-center justify-center text-primary/20 font-game text-4xl">
+          ?
+        </div>
+      </>
+    );
+  }
+
+  const mediaType = getMediaType(src);
+
+  if (mediaType === 'video') {
+    return (
+      <video
+        src={src}
+        className="w-full h-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={`${title} preview`}
+      className="w-full h-full object-cover"
+    />
+  );
+}
 
 export default function Projects() {
   const { data: projects, isLoading, error } = useProjects();
@@ -34,10 +70,7 @@ export default function Projects() {
                 data-testid={`card-project-${project.id}`}
               >
                 <div className="h-48 bg-muted rounded mb-4 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors" />
-                  <div className="absolute inset-0 flex items-center justify-center text-primary/20 font-game text-4xl">
-                    ?
-                  </div>
+                  <MediaPreview src={project.preview} title={project.title} />
                 </div>
                 <h3 className="text-xl font-hud font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                   {project.title}
