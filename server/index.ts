@@ -86,8 +86,8 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
 
-  // Use localhost in development for macOS compatibility, 0.0.0.0 in production
-  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+  // Use localhost in development for macOS compatibility, 0.0.0.0 in production or Replit
+  const host = process.env.NODE_ENV === "production" || process.env.REPLIT_ENVIRONMENT ? "0.0.0.0" : "localhost";
 
   httpServer.listen(port, host, () => {
     log(`serving on port ${port}`);
