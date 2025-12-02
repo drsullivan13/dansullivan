@@ -30,6 +30,8 @@ export interface Recipe {
   title: string;
   description: string;
   prepTime: string;
+  cookTime: string;
+  totalTime: string;
   tags: string[];
   ingredients: string[];
   content: string;

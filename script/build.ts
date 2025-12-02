@@ -1,6 +1,5 @@
-import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm } from "fs/promises";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -39,26 +38,36 @@ async function buildAll() {
   await viteBuild();
 
   console.log("building server...");
-  const pkg = JSON.parse(await readFile("package.json", "utf-8"));
+  const pkg = await Bun.file("package.json").json();
   const allDeps = [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.devDependencies || {}),
   ];
   const externals = allDeps.filter((dep) => !allowlist.includes(dep));
 
-  await esbuild({
-    entryPoints: ["server/index.ts"],
-    platform: "node",
-    bundle: true,
+  const result = await Bun.build({
+    entrypoints: ["./server/index.ts"],
+    outdir: "./dist",
+    target: "node",
     format: "cjs",
-    outfile: "dist/index.cjs",
+    naming: "index.cjs",
+    minify: true,
+    external: externals,
     define: {
       "process.env.NODE_ENV": '"production"',
     },
-    minify: true,
-    external: externals,
-    logLevel: "info",
+    sourcemap: "external",
   });
+
+  if (!result.success) {
+    console.error("Server build failed:");
+    for (const log of result.logs) {
+      console.error(log);
+    }
+    process.exit(1);
+  }
+
+  console.log(`  dist/index.cjs  ${(result.outputs[0]?.size / 1024).toFixed(1)}kb`);
 }
 
 buildAll().catch((err) => {

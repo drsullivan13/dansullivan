@@ -42,7 +42,7 @@ export default function Recipes() {
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">{recipe.description}</p>
                   <div className="flex gap-2 text-xs font-mono text-accent flex-wrap">
-                    <span className="bg-accent/10 px-2 py-1 rounded">{recipe.prepTime}</span>
+                    <span className="bg-accent/10 px-2 py-1 rounded">{recipe.totalTime}</span>
                     {recipe.tags.map(tag => (
                       <span key={tag} className="bg-accent/10 px-2 py-1 rounded">{tag}</span>
                     ))}

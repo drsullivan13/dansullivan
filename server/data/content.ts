@@ -33,6 +33,8 @@ export interface Recipe {
   title: string;
   description: string;
   prepTime: string;
+  cookTime: string;
+  totalTime: string;
   tags: string[];
   ingredients: string[];
   content: string;
@@ -146,6 +148,8 @@ export function getRecipes(): Recipe[] {
       title: data.title || "Untitled Recipe",
       description: data.description || "",
       prepTime: data.prepTime || "",
+      cookTime: data.cookTime || "",
+      totalTime: data.totalTime || "",
       tags: data.tags || [],
       ingredients: data.ingredients || [],
       content: marked(content) as string,
