@@ -87,8 +87,8 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || "5000", 10);
 
   // Use localhost in development for macOS compatibility, 0.0.0.0 in production or Replit
-  const host = process.env.NODE_ENV === "production" || process.env.REPLIT_ENVIRONMENT ? "0.0.0.0" : "localhost";
-
+  const host = process.env.NODE_ENV === "production" || process.env.REPL_ID !== undefined ? "0.0.0.0" : "localhost";
+  
   httpServer.listen(port, host, () => {
     log(`serving on port ${port}`);
   });

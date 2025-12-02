@@ -8,7 +8,7 @@ export default function About() {
       
       <div className="flex-1 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-700">
         <div className="w-32 h-32 rounded-full bg-white/10 mb-8 overflow-hidden border-4 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-          <img src="/content/media/profile.png" alt="Dan Sullivan"/>
+          <img src="/content/media/profile.png" alt="Dan Sullivan" className="w-full h-full object-cover"/>
         </div>
         
         <h1 className="text-5xl font-game text-white mb-6 text-glow">Dan Sullivan</h1>
