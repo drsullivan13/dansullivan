@@ -27,6 +27,9 @@ export default function About() {
           <Button asChild variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">
             <a href="https://twitter.com/dansullivan_" target="_blank" rel="noopener noreferrer">X</a>
           </Button>
+          <Button asChild variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">
+            <a href="https://www.linkedin.com/in/danielsullivan2025/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </Button>
         </div>
       </div>
     </div>
