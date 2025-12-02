@@ -76,10 +76,12 @@ export default function ProjectDetail() {
                 <MediaPreview src={project.preview} />
               </div>
 
-              <div className="prose prose-invert max-w-none">
-                <h3 className="font-hud text-2xl text-white mb-4">MISSION REPORT</h3>
-                <div 
-                  className="text-muted-foreground leading-relaxed prose-headings:text-white prose-headings:font-hud prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-p:mb-4 prose-ul:my-4 prose-li:my-1 prose-strong:text-white prose-blockquote:border-primary prose-blockquote:text-primary/80"
+              <div>
+                <h2 className="font-hud text-3xl font-bold tracking-widest text-primary mb-8 pb-4 border-b-2 border-primary/30 text-glow">
+                  MISSION REPORT
+                </h2>
+                <div
+                  className="mission-prose"
                   dangerouslySetInnerHTML={{ __html: project.content }}
                 />
               </div>
@@ -103,6 +105,12 @@ export default function ProjectDetail() {
                   <div>
                     <div className="text-xs text-muted-foreground mb-1 font-mono">ROLE</div>
                     <div className="font-hud font-bold text-lg">{project.role}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1 font-mono">LINK</div>
+                    <div className="font-hud font-bold text-lg">
+                      {project.projectLink ? <a href={project.projectLink} target="_blank" rel="noopener noreferrer">{project.projectLink}</a> : 'N/A'}
+                    </div>
                   </div>
                 </div>
 

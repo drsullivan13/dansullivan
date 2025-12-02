@@ -14,6 +14,7 @@ export interface Project {
   architecture: string;
   preview?: string;
   demoUrl?: string;
+  projectLink?: string;
 }
 
 export interface BlogPost {
@@ -81,7 +82,8 @@ export function getProjects(): Project[] {
       timeframe: data.timeframe || "",
       architecture: data.architecture || "",
       preview: data.preview,
-      demoUrl: data.demoUrl
+      demoUrl: data.demoUrl,
+      projectLink: data.projectLink
     };
   });
 }

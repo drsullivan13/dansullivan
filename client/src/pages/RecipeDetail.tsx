@@ -83,7 +83,7 @@ export default function RecipeDetail() {
               <div className="p-8 md:col-span-2 bg-background">
                 <h3 className="font-game text-sm text-accent mb-6">SYNTHESIS PROTOCOL</h3>
                 <div 
-                  className="prose prose-invert max-w-none text-muted-foreground leading-relaxed prose-headings:text-accent prose-headings:font-game prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-4 prose-p:mb-4 prose-ol:my-4 prose-li:my-2 prose-strong:text-white"
+                  className="mission-prose"
                   dangerouslySetInnerHTML={{ __html: recipe.content }}
                 />
               </div>

@@ -11,6 +11,7 @@ export interface Project {
   architecture: string;
   preview?: string;
   demoUrl?: string;
+  projectLink?: string;
 }
 
 export interface BlogPost {
