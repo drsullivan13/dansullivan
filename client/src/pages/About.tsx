@@ -11,17 +11,22 @@ export default function About() {
           <img src="https://github.com/shadcn.png" alt="Pilot" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
         </div>
         
-        <h1 className="text-5xl font-game text-white mb-6 text-glow">COMMANDER</h1>
+        <h1 className="text-5xl font-game text-white mb-6 text-glow">Dan Sullivan</h1>
         <p className="text-xl font-hud text-muted-foreground max-w-xl leading-relaxed mb-8">
-          I build digital experiences that feel like magic. 
-          Currently piloting the frontend architecture at Replit.
-          Obsessed with performance, pixel perfection, and retro games.
+          I'm a software engineer who enjoys learning new technologies and building things.
+          This site contains a collection of my interests ranging from coding to cooking and everything in between.
         </p>
         
         <div className="flex gap-4">
-          <Button className="font-game text-xs bg-white text-black hover:bg-white/90 hover:scale-105 transition-transform">CONTACT</Button>
-          <Button variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">GITHUB</Button>
-          <Button variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">TWITTER</Button>
+          <Button asChild className="font-game text-xs bg-white text-black hover:bg-white/90 hover:scale-105 transition-transform">
+            <a href="mailto:drsulivan13@gmail.com">CONTACT</a>
+          </Button>
+          <Button asChild variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">
+            <a href="https://github.com/drsullivan13" target="_blank" rel="noopener noreferrer">GITHUB</a>
+          </Button>
+          <Button asChild variant="outline" className="font-game text-xs hover:bg-white/10 hover:scale-105 transition-transform">
+            <a href="https://twitter.com/dansullivan_" target="_blank" rel="noopener noreferrer">X</a>
+          </Button>
         </div>
       </div>
     </div>
