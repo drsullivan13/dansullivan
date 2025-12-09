@@ -2,7 +2,7 @@
 title: Financial Intelligence
 description: An AI-powered analytics platform for discovering correlations between alternative data signals and stock performance.
 technologies:
-  - Next.js v16
+  - Next.js v19
   - Supabase
   - Tailwind v4
   - Anthropic Haiku 4.5

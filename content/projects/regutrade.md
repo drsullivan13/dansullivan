@@ -1,43 +1,51 @@
 ---
 title: ReguTrade
-description: An AI-powered analytics platform for discovering correlations between alternative data signals and stock performance.
+description: Institutional-grade DeFi trade execution and compliance reporting platform built on Uniswap V3 and Base L2.
 technologies:
-  - Next.js v16
-  - Supabase
-  - Tailwind v4
-  - Anthropic Haiku 4.5
-  - Vercel
+  - Uniswap V3 QuoterV2
+  - Base L2
+  - React 19
+  - TypeScript
+  - Viem
+  - Wagmi
+  - Express
+  - Drizzle ORM
+  - PostgreSQL
+  - Uniswap V3 SwapRouter02
+  - The Graph Protocol
 role: Full Stack Development
-timeframe: Q3 2025
-architecture: Data Visualization
-preview: /content/media/fin-intel-preview.png 
-demoUrl: https://www.youtube.com/watch?v=U5ij0jMuTFQ&list=PL--sOUbTSgLcXMvHaxZW1xhI6LzTeE9YU
-projectLink: https://fin-intel.com/
+timeframe: Q4 2024
+architecture: Blockchain Integration
+preview: /content/media/regutrade-preview.png 
+demoUrl: https://www.youtube.com/watch?v=Nem_Km6Ty4c&t=1s
+projectLink: https://regutrade.replit.app/
 ---
 
-Built an AI-powered analytics platform that transforms natural language queries into interactive data visualizations. Users can discover correlations between alternative data signals (job postings, social sentiment, hiring trends) and stock performance across 12 major tickers using plain English requests.
+Built a DeFi compliance platform that brings institutional-grade execution analytics and regulatory reporting to decentralized exchanges. Bridges the gap between DeFi's transparency and traditional finance's audit requirements through direct smart contract integration and comprehensive swap documentation.
 
 ## The Challenge
 
-Financial analysts need to test dozens of hypotheses daily, but traditional dashboards require navigating multiple dropdowns and configuration screens. The goal was to reduce the time from question to insight from minutes to seconds.
+Institutional traders need DeFi's permissionless access and transparent pricing, but can't execute without proper audit trails, best execution proof, and regulatory documentation. Traditional DEX interfaces lack the compliance infrastructure required for regulated entities.
 
-## Natural Language Interface
+## Smart Contract Integration
 
-The core innovation is a Claude Haiku-powered query parser that extracts structured parameters from conversational input. "Show correlation between job postings and price for AAPL" becomes a validated API call with ticker symbols, metrics, and date ranges. Achieved 90% cost savings by using Haiku 4.5 instead of larger models while maintaining accuracy.
+Direct integration with Uniswap V3's QuoterV2 contract on Base L2 to discover optimal routing across all fee tiers (0.01%, 0.05%, 0.3%, 1%). Parallel queries analyze liquidity depth and price impact across pools, ranking routes by net output after real-time gas cost calculations converted to USD.
 
-## Discovery Engine
+## Compliance-First Architecture
 
-One-click functionality that tests all 11 available metrics against stock price, ranking results by correlation strength. Analysts can immediately click any result to visualize the relationship—turning exploratory analysis from a 30-minute process into a 10-second operation.
+Every swap generates a complete audit trail: predicted vs actual output, execution variance analysis, price impact calculations, gas costs, routing strategy, and immutable blockchain verification. JSONB storage preserves all analyzed routes for regulatory review, while PDF reports provide institutional-grade documentation.
 
 ## Technical Decisions
 
-1. **Three-layer validation**: Client-side type checking, API-level sanitization, and AI response verification ensure data integrity
-2. **Dual visualization modes**: Scatter plots for correlation analysis, time-series charts with dual Y-axes for trend analysis
-3. **Interactive query editing**: Pill-shaped UI elements allow real-time modification of tickers and metrics with preview before execution
-4. **Admin approval workflow**: Supabase authentication with edge functions for automated email notifications
+1. **Type-safe blockchain interactions**: Viem for contract calls with full TypeScript inference from ABIs, Wagmi for wallet state management
+2. **Multi-tier route optimization**: Queries all four Uniswap fee tiers simultaneously, factoring gas costs into route selection
+3. **Hybrid pricing architecture**: Primary on-chain quotes via QuoterV2 with The Graph Protocol fallback for real-time market data
+4. **Slippage protection**: Configurable tolerance with real-time validation before transaction submission
+5. **Transaction verification**: Links to BaseScan for on-chain proof with complete calldata transparency
 
 ## Scale
 
-- **12,080 data points** across 12 tickers covering 2024-present
-- **11 alternative data metrics** including social sentiment, hiring momentum, and community activity
-- **Sub-second query response** times with Chart.js visualization rendering
+- **Four fee tier analysis** per quote request (0.01%, 0.05%, 0.3%, 1%)
+- **Real-time gas estimation** with USD conversion for accurate route comparison
+- **Complete trade history** with blockchain verification and execution metrics
+- **PDF compliance reports** with variance analysis and regulatory documentation
