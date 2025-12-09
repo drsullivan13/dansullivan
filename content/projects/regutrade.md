@@ -14,7 +14,7 @@ technologies:
   - Uniswap V3 SwapRouter02
   - The Graph Protocol
 role: Full Stack Development
-timeframe: Q4 2024
+timeframe: Q4 2025
 architecture: Blockchain Integration
 preview: /content/media/regutrade-preview.png 
 demoUrl: https://www.youtube.com/watch?v=Nem_Km6Ty4c&t=1s
