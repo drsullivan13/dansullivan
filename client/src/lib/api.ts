@@ -38,8 +38,8 @@ export interface Recipe {
   emoji: string;
 }
 
-async function fetchAPI<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+async function fetchAPI<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(url, { signal });
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -49,14 +49,14 @@ async function fetchAPI<T>(url: string): Promise<T> {
 export function useProjects() {
   return useQuery({
     queryKey: ["projects"],
-    queryFn: () => fetchAPI<Project[]>("/api/projects"),
+    queryFn: ({ signal }) => fetchAPI<Project[]>("/api/projects", signal),
   });
 }
 
 export function useProject(id: string) {
   return useQuery({
     queryKey: ["projects", id],
-    queryFn: () => fetchAPI<Project>(`/api/projects/${id}`),
+    queryFn: ({ signal }) => fetchAPI<Project>(`/api/projects/${id}`, signal),
     enabled: !!id,
   });
 }
@@ -64,14 +64,14 @@ export function useProject(id: string) {
 export function useBlogPosts() {
   return useQuery({
     queryKey: ["blog"],
-    queryFn: () => fetchAPI<BlogPost[]>("/api/blog"),
+    queryFn: ({ signal }) => fetchAPI<BlogPost[]>("/api/blog", signal),
   });
 }
 
 export function useBlogPost(id: string) {
   return useQuery({
     queryKey: ["blog", id],
-    queryFn: () => fetchAPI<BlogPost>(`/api/blog/${id}`),
+    queryFn: ({ signal }) => fetchAPI<BlogPost>(`/api/blog/${id}`, signal),
     enabled: !!id,
   });
 }
@@ -79,14 +79,14 @@ export function useBlogPost(id: string) {
 export function useRecipes() {
   return useQuery({
     queryKey: ["recipes"],
-    queryFn: () => fetchAPI<Recipe[]>("/api/recipes"),
+    queryFn: ({ signal }) => fetchAPI<Recipe[]>("/api/recipes", signal),
   });
 }
 
 export function useRecipe(id: string) {
   return useQuery({
     queryKey: ["recipes", id],
-    queryFn: () => fetchAPI<Recipe>(`/api/recipes/${id}`),
+    queryFn: ({ signal }) => fetchAPI<Recipe>(`/api/recipes/${id}`, signal),
     enabled: !!id,
   });
 }

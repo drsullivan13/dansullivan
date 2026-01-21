@@ -25,6 +25,7 @@ function MediaPreview({ src, title }: { src?: string; title: string }) {
         loop
         muted
         playsInline
+        preload="metadata"
       />
     );
   }
@@ -33,6 +34,10 @@ function MediaPreview({ src, title }: { src?: string; title: string }) {
     <img
       src={src}
       alt={`${title} preview`}
+      width={400}
+      height={192}
+      loading="lazy"
+      decoding="async"
       className="w-full h-full object-cover"
     />
   );
@@ -50,7 +55,7 @@ export default function Projects() {
       
       {isLoading && (
         <div className="text-center text-primary font-game text-sm animate-pulse">
-          LOADING DATA...
+          LOADING DATA\u2026
         </div>
       )}
       

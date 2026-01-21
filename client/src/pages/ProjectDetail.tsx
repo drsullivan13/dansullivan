@@ -1,6 +1,6 @@
 import { NavBar } from "@/components/layout/NavBar";
 import { Button } from "@/components/ui/button";
-import { useRoute, Link } from "wouter";
+import { useParams, Link } from "wouter";
 import { useProject, getMediaType } from "@/lib/api";
 
 function MediaPreview({ src }: { src?: string }) {
@@ -23,6 +23,7 @@ function MediaPreview({ src }: { src?: string }) {
         loop
         muted
         playsInline
+        preload="metadata"
       />
     );
   }
@@ -31,14 +32,18 @@ function MediaPreview({ src }: { src?: string }) {
     <img
       src={src}
       alt="Project preview"
+      width={800}
+      height={450}
+      loading="lazy"
+      decoding="async"
       className="w-full h-full object-cover"
     />
   );
 }
 
 export default function ProjectDetail() {
-  const [match, params] = useRoute("/projects/:id");
-  const id = params?.id || "";
+  const params = useParams<{ id: string }>();
+  const id = params.id || "";
   const { data: project, isLoading, error } = useProject(id);
 
   return (
@@ -46,15 +51,13 @@ export default function ProjectDetail() {
       <NavBar />
       
       <div className="max-w-5xl mx-auto animate-in slide-in-from-bottom-8 fade-in duration-700">
-        <Link href="/projects">
-          <Button variant="ghost" className="mb-6 font-game text-xs pl-0 hover:bg-transparent hover:text-primary">
-            ← RETURN TO ARCHIVE
-          </Button>
+        <Link href="/projects" className="inline-block mb-6 font-game text-xs hover:text-primary transition-colors">
+          ← RETURN TO ARCHIVE
         </Link>
 
         {isLoading && (
           <div className="text-center text-primary font-game text-sm animate-pulse mt-20">
-            LOADING PROJECT DATA...
+            LOADING PROJECT DATA\u2026
           </div>
         )}
 

@@ -1,11 +1,11 @@
 import { NavBar } from "@/components/layout/NavBar";
 import { Button } from "@/components/ui/button";
-import { useRoute, Link } from "wouter";
+import { useParams, Link } from "wouter";
 import { useBlogPost } from "@/lib/api";
 
 export default function BlogPost() {
-  const [match, params] = useRoute("/blog/:id");
-  const id = params?.id || "";
+  const params = useParams<{ id: string }>();
+  const id = params.id || "";
   const { data: post, isLoading, error } = useBlogPost(id);
 
   return (
@@ -13,15 +13,13 @@ export default function BlogPost() {
       <NavBar />
       
       <article className="max-w-3xl mx-auto animate-in slide-in-from-bottom-8 fade-in duration-700">
-        <Link href="/blog">
-          <Button variant="ghost" className="mb-8 font-game text-xs pl-0 text-muted-foreground hover:text-secondary hover:bg-transparent">
-            ← RETURN TO FEED
-          </Button>
+        <Link href="/blog" className="inline-block mb-8 font-game text-xs text-muted-foreground hover:text-secondary transition-colors">
+          ← RETURN TO FEED
         </Link>
 
         {isLoading && (
           <div className="text-center text-secondary font-game text-sm animate-pulse mt-20">
-            LOADING TRANSMISSION...
+            LOADING TRANSMISSION\u2026
           </div>
         )}
 

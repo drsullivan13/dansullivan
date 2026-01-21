@@ -14,7 +14,7 @@ export default function Blog() {
       
       {isLoading && (
         <div className="text-center text-secondary font-game text-sm animate-pulse">
-          LOADING TRANSMISSIONS...
+          LOADING TRANSMISSIONS\u2026
         </div>
       )}
       
@@ -44,10 +44,8 @@ export default function Blog() {
               <p className="text-muted-foreground leading-relaxed">
                 {post.excerpt}
               </p>
-              <Link href={`/blog/${post.id}`}>
-                <button className="mt-4 text-secondary text-sm font-bold hover:underline" data-testid={`button-read-${post.id}`}>
-                  READ DATA STREAM →
-                </button>
+              <Link href={`/blog/${post.id}`} className="mt-4 inline-block text-secondary text-sm font-bold hover:underline" data-testid={`button-read-${post.id}`}>
+                READ DATA STREAM →
               </Link>
             </article>
           ))}

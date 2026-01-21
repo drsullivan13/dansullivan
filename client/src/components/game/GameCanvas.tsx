@@ -208,8 +208,9 @@ export function GameCanvas() {
       className="relative w-full h-screen bg-background overflow-hidden select-none cursor-none fixed inset-0"
       onClick={handleTouch}
       onTouchStart={handleTouch}
-      tabIndex={0} // Ensure div can take focus for keys if needed (though we use window listeners)
-      autoFocus
+      tabIndex={0}
+      role="application"
+      aria-label="Space shooter game - use arrow keys to move and space to shoot"
     >
       <canvas
         ref={canvasRef}
@@ -249,8 +250,15 @@ export function GameCanvas() {
   );
 }
 
+const targetDelays = new Map<string, number>();
+
 function TargetDisplay({ target }: { target: Target }) {
   if (target.hp <= 0) return null;
+
+  if (!targetDelays.has(target.id)) {
+    targetDelays.set(target.id, Math.random() * 2);
+  }
+  const animationDelay = targetDelays.get(target.id)!;
 
   return (
     <div 
@@ -261,22 +269,22 @@ function TargetDisplay({ target }: { target: Target }) {
         width: target.width,
         height: target.height,
         animation: 'float 6s ease-in-out infinite',
-        animationDelay: `${Math.random() * 2}s`
+        animationDelay: `${animationDelay}s`
       }}
     >
       <div 
         className={cn(
-          "w-full h-full rounded-xl border-2 flex flex-col items-center justify-center gap-2 bg-black/80 backdrop-blur-md p-4 transition-all duration-200 pointer-events-auto cursor-crosshair",
+          "w-full h-full rounded-xl border-2 flex flex-col items-center justify-center gap-2 bg-black/80 backdrop-blur-md p-4 transition-transform transition-shadow duration-200 pointer-events-auto cursor-crosshair",
           "shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]",
         )}
         style={{ borderColor: target.color, boxShadow: `0 0 10px ${target.color}40` }}
       >
-        <target.icon className="w-8 h-8" style={{ color: target.color }} />
+        <target.icon className="w-8 h-8" style={{ color: target.color }} aria-hidden="true" />
         <span className="font-hud font-bold tracking-widest text-white">{target.label}</span>
         <Progress 
           value={(target.hp / target.maxHp) * 100} 
           className="h-2 w-full mt-2 bg-white/10" 
-          indicatorClassName="transition-all duration-100"
+          indicatorClassName="transition-[width] duration-100"
           style={{ "--progress-background": target.color } as any} 
         />
       </div>

@@ -1,12 +1,11 @@
 import { NavBar } from "@/components/layout/NavBar";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useRoute, Link } from "wouter";
+import { useParams, Link } from "wouter";
 import { useRecipe } from "@/lib/api";
 
 export default function RecipeDetail() {
-  const [match, params] = useRoute("/recipes/:id");
-  const id = params?.id || "";
+  const params = useParams<{ id: string }>();
+  const id = params.id || "";
   const { data: recipe, isLoading, error } = useRecipe(id);
 
   return (
@@ -14,15 +13,13 @@ export default function RecipeDetail() {
       <NavBar />
       
       <div className="max-w-4xl mx-auto animate-in zoom-in-95 fade-in duration-500">
-        <Link href="/recipes">
-          <Button variant="ghost" className="mb-6 font-game text-xs pl-0 text-muted-foreground hover:text-accent hover:bg-transparent">
-            ← RETURN TO MESS HALL
-          </Button>
+        <Link href="/recipes" className="inline-block mb-6 font-game text-xs text-muted-foreground hover:text-accent transition-colors">
+          ← RETURN TO MESS HALL
         </Link>
 
         {isLoading && (
           <div className="text-center text-accent font-game text-sm animate-pulse mt-20">
-            LOADING RECIPE DATA...
+            LOADING RECIPE DATA\u2026
           </div>
         )}
 

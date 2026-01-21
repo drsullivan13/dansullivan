@@ -14,7 +14,7 @@ export default function Recipes() {
       
       {isLoading && (
         <div className="text-center text-accent font-game text-sm animate-pulse">
-          LOADING FUEL DATA...
+          LOADING FUEL DATA\u2026
         </div>
       )}
       
