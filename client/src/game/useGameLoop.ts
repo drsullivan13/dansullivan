@@ -161,6 +161,10 @@ export function useGameLoop(width: number, height: number) {
     }
   }, [width, height, setLocation]);
 
+  const fire = useCallback(() => {
+    fireProjectile();
+  }, [width, height]);
+
   // We return the REFS so the canvas can read them directly in its own loop
   return {
     shipXRef,
@@ -169,6 +173,7 @@ export function useGameLoop(width: number, height: number) {
     targets: targetsState, // React State for DOM
     score,
     update, // The logic function
-    setShipX: (x: number) => { shipXRef.current = x; }
+    setShipX: (x: number) => { shipXRef.current = x; },
+    fire, // Expose fire method for mobile button
   };
 }

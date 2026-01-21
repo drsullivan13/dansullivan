@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useGameLoop } from "../../game/useGameLoop";
 import { GAME_CONFIG } from "../../game/constants";
 import shipImageSrc from "@assets/generated_images/retro_8-bit_pixel_art_spaceship.png";
@@ -7,6 +7,7 @@ import { Target } from "../../game/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Star {
   x: number;
@@ -21,6 +22,10 @@ export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
   const [_, setLocation] = useLocation();
+  const isMobile = useIsMobile();
+  
+  // Pointer drag state for mobile
+  const activePointerIdRef = useRef<number | null>(null);
   
   // Stars Ref
   const starsRef = useRef<Star[]>([]);
@@ -60,7 +65,7 @@ export function GameCanvas() {
     starsRef.current = stars;
   }, [dimensions.width, dimensions.height]);
 
-  const { shipXRef, projectilesRef, particlesRef, targets, score, update, setShipX } = useGameLoop(dimensions.width, dimensions.height);
+  const { shipXRef, projectilesRef, particlesRef, targets, score, update, setShipX, fire } = useGameLoop(dimensions.width, dimensions.height);
   const shipImgRef = useRef<HTMLImageElement>(null);
   const shipCanvasRef = useRef<HTMLCanvasElement | null>(null); // Cache the processed ship image
 
@@ -192,25 +197,78 @@ export function GameCanvas() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [dimensions, update]); // Dependencies: update is stable from useGameLoop
 
-  const handleTouch = (e: React.TouchEvent | React.MouseEvent) => {
-    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+  // Desktop click-to-move handler
+  const handleClick = (e: React.MouseEvent) => {
+    if (isMobile) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
-    const x = clientX - rect.left;
-    const percentage = (x / rect.width) * 100;
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(2, Math.min(98, (x / rect.width) * 100));
     setShipX(percentage);
   };
+
+  // Mobile pointer drag handlers
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (!isMobile) return;
+    if (activePointerIdRef.current !== null) return;
+    activePointerIdRef.current = e.pointerId;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(2, Math.min(98, (x / rect.width) * 100));
+    setShipX(percentage);
+  }, [isMobile, setShipX]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isMobile) return;
+    if (activePointerIdRef.current !== e.pointerId) return;
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(2, Math.min(98, (x / rect.width) * 100));
+    setShipX(percentage);
+  }, [isMobile, setShipX]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (activePointerIdRef.current === e.pointerId) {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      activePointerIdRef.current = null;
+    }
+  }, []);
+
+  const handlePointerCancel = useCallback((e: React.PointerEvent) => {
+    if (activePointerIdRef.current === e.pointerId) {
+      activePointerIdRef.current = null;
+    }
+  }, []);
+
+  // Fire button handler for mobile
+  const handleFireButton = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+    fire();
+  }, [fire]);
 
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-screen bg-background overflow-hidden select-none cursor-none fixed inset-0"
-      onClick={handleTouch}
-      onTouchStart={handleTouch}
+      className={cn(
+        "relative w-full h-screen bg-background overflow-hidden select-none fixed inset-0",
+        isMobile ? "touch-none" : "cursor-none"
+      )}
+      onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       tabIndex={0}
       role="application"
-      aria-label="Space shooter game - use arrow keys to move and space to shoot"
+      aria-label={isMobile 
+        ? "Space shooter game - drag to move and tap fire button to shoot"
+        : "Space shooter game - use arrow keys to move and space to shoot"
+      }
     >
       <canvas
         ref={canvasRef}
@@ -241,10 +299,22 @@ export function GameCanvas() {
           <TargetDisplay key={target.id} target={target} />
         ))}
       </div>
+
+      {/* Mobile Fire Button */}
+      {isMobile && (
+        <button
+          className="absolute bottom-8 right-8 z-30 w-16 h-16 rounded-full bg-primary/80 border-2 border-primary shadow-[0_0_20px_rgba(0,255,255,0.5)] flex items-center justify-center font-game text-black text-xs active:scale-95 active:bg-primary transition-transform pointer-events-auto"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          onPointerDown={handleFireButton}
+          aria-label="Fire"
+        >
+          FIRE
+        </button>
+      )}
       
       {/* Controls Hint */}
       <div className="absolute bottom-4 left-0 right-0 text-center text-white/30 font-hud text-sm pointer-events-none z-20">
-        [← →] MOVE  [SPACE] SHOOT
+        {isMobile ? 'DRAG TO MOVE • TAP FIRE' : '[← →] MOVE  [SPACE] SHOOT'}
       </div>
     </div>
   );
